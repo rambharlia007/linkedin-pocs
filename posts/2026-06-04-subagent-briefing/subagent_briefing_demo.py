@@ -70,11 +70,17 @@ class CallStats:
     duration_s: float
 
 
+RAW_LOG = Path(__file__).parent / "raw-exchange.jsonl"
+
+
 def subagent_call(client: OpenAI, label: str, task_prompt: str) -> CallStats:
     """
     Spawn a 'subagent'. The whole point: this is a fresh chat completion.
     Its message list starts empty (just system + the task). It does NOT
     inherit the parent's conversation, files-read state, or scratch context.
+
+    Full request + raw response object are appended to raw-exchange.jsonl
+    so you can verify exactly what crossed the wire.
     """
     t0 = time.time()
     create_kwargs = {
@@ -86,16 +92,28 @@ def subagent_call(client: OpenAI, label: str, task_prompt: str) -> CallStats:
     }
     token_param = "max_completion_tokens" if MODEL.lower().startswith(("gpt-5", "o1", "o3", "o4")) else "max_tokens"
     create_kwargs[token_param] = 600
+
     resp = client.chat.completions.create(**create_kwargs)
+    duration = round(time.time() - t0, 2)
     msg = resp.choices[0].message.content or ""
     u = resp.usage
+
+    raw = {
+        "label": label,
+        "duration_s": duration,
+        "request": create_kwargs,
+        "response": resp.model_dump(),
+    }
+    with RAW_LOG.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(raw, default=str) + "\n")
+
     return CallStats(
         label=label,
         response_text=msg,
         prompt_tokens=u.prompt_tokens,
         completion_tokens=u.completion_tokens,
         total_tokens=u.total_tokens,
-        duration_s=round(time.time() - t0, 2),
+        duration_s=duration,
     )
 
 
@@ -208,6 +226,9 @@ def main() -> int:
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"], base_url=base_url) if base_url else OpenAI()
     print(f"Model: {MODEL}")
     print(f"Endpoint: {base_url or 'OpenAI default'}")
+
+    if RAW_LOG.exists():
+        RAW_LOG.unlink()
 
     p1, isolated = probe_1_conversation_isolation(client)
     p2 = probe_2_bad_briefing(client)
