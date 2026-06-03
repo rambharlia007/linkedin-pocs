@@ -35,10 +35,26 @@ from dataclasses import dataclass
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent / ".env")
+except ImportError:
+    pass
+
 from openai import OpenAI
 
 
 MODEL = os.getenv("DEMO_MODEL", "claude-sonnet-4-6")
+
+
+def _resolve_base_url() -> str | None:
+    raw = os.getenv("OPENAI_BASE_URL") or os.getenv("OPENAI_API_BASE")
+    if not raw:
+        return None
+    normalized = raw.rstrip("/")
+    if normalized.lower().endswith("/responses"):
+        normalized = normalized[: -len("/responses")]
+    return normalized
 HERE = Path(__file__).parent
 SOURCE_FILE = HERE / "PaymentValidator.cs"
 SECRET_TOKEN = "PURPLE_OWL_42"
@@ -61,14 +77,16 @@ def subagent_call(client: OpenAI, label: str, task_prompt: str) -> CallStats:
     inherit the parent's conversation, files-read state, or scratch context.
     """
     t0 = time.time()
-    resp = client.chat.completions.create(
-        model=MODEL,
-        max_tokens=600,
-        messages=[
+    create_kwargs = {
+        "model": MODEL,
+        "messages": [
             {"role": "system", "content": "You are a focused assistant. Answer only what is asked."},
             {"role": "user", "content": task_prompt},
         ],
-    )
+    }
+    token_param = "max_completion_tokens" if MODEL.lower().startswith(("gpt-5", "o1", "o3", "o4")) else "max_tokens"
+    create_kwargs[token_param] = 600
+    resp = client.chat.completions.create(**create_kwargs)
     msg = resp.choices[0].message.content or ""
     u = resp.usage
     return CallStats(
@@ -186,7 +204,7 @@ def main() -> int:
         print("ERROR: OPENAI_API_KEY not set. Copy .env.example to .env first.", file=sys.stderr)
         return 1
 
-    base_url = os.getenv("OPENAI_BASE_URL")
+    base_url = _resolve_base_url()
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"], base_url=base_url) if base_url else OpenAI()
     print(f"Model: {MODEL}")
     print(f"Endpoint: {base_url or 'OpenAI default'}")

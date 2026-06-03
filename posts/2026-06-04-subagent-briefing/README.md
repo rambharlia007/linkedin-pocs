@@ -67,7 +67,7 @@ cp .env.example .env       # then fill in OPENAI_API_KEY (+ base_url if proxy)
 python subagent_briefing_demo.py
 ```
 
-Compatible endpoints (set `OPENAI_BASE_URL`):
+Compatible endpoints (set `OPENAI_BASE_URL` *or* the legacy `OPENAI_API_BASE`):
 
 - Anthropic direct (via an OpenAI-compatible proxy)
 - AWS Bedrock (via LiteLLM proxy or Bedrock's OpenAI-compat shim)
@@ -75,7 +75,10 @@ Compatible endpoints (set `OPENAI_BASE_URL`):
 - OpenRouter (any tool-use model)
 - A self-hosted LiteLLM proxy fronting any of the above
 
-Total run cost on Sonnet 4.6 ≈ $0.01-$0.03 depending on output verbosity.
+Total run cost on Sonnet 4.6 ≈ $0.01-$0.03 depending on output verbosity. The script also auto-handles GPT-5 / o-series models (uses `max_completion_tokens` for those).
+
+If your Azure endpoint URL ends with `/responses`, the script normalises it
+to the chat-completions root automatically.
 
 ## Expected output shape
 
