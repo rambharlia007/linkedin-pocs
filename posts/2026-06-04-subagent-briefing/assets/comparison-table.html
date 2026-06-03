@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Subagent Briefing — Comparison</title>
+<style>
+  :root {
+    --ink:       #0f1419;
+    --muted:     #5b6772;
+    --rule:      #e2e6ea;
+    --accent:    #c2410c;
+    --pos:       #166534;
+    --neg:       #991b1b;
+    --bg:        #ffffff;
+  }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    font-feature-settings: "ss01", "tnum";
+  }
+  .frame {
+    width: 1200px;
+    padding: 64px 72px;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 18px;
+    font-weight: 600;
+  }
+  h1 {
+    font-size: 38px;
+    line-height: 1.18;
+    margin: 0 0 12px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .sub {
+    font-size: 17px;
+    color: var(--muted);
+    margin: 0 0 40px;
+    max-width: 880px;
+    line-height: 1.5;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 19px;
+  }
+  th, td {
+    padding: 18px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--rule);
+  }
+  th {
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 13px;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 12px;
+  }
+  td.metric {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 22px;
+  }
+  td.label {
+    font-weight: 500;
+  }
+  td.brief-vague {
+    color: var(--neg);
+    font-weight: 600;
+  }
+  td.brief-explicit {
+    color: var(--pos);
+    font-weight: 600;
+  }
+  .verdict {
+    font-style: italic;
+    color: var(--muted);
+  }
+  .findings-zero { color: var(--neg); font-weight: 700; }
+  .findings-good { color: var(--pos); font-weight: 700; }
+  .receipt {
+    margin-top: 44px;
+    padding: 24px 28px;
+    background: #f7f9fb;
+    border-left: 4px solid var(--accent);
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .receipt code {
+    background: #ecf0f3;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 14px;
+    color: #1f2933;
+  }
+  .footer {
+    margin-top: 36px;
+    font-size: 14px;
+    color: var(--muted);
+    border-top: 1px solid var(--rule);
+    padding-top: 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="eyebrow">Inside Claude Code · live experiment</div>
+  <h1>Same model, same task. Briefing changes everything.</h1>
+  <p class="sub">
+    Three runs against the same buggy C# file. The only variable is the prompt
+    handed to the subagent. Numbers below come from the actual Claude Code Agent
+    tool, captured this afternoon.
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Subagent</th>
+        <th>Brief</th>
+        <th style="text-align:right">Tokens</th>
+        <th style="text-align:right">Duration</th>
+        <th style="text-align:right">Findings</th>
+        <th>Outcome</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="label">dotnet-code-reviewer</td>
+        <td class="brief-vague">vague</td>
+        <td class="metric" style="text-align:right">26,877</td>
+        <td class="metric" style="text-align:right">7.4 s</td>
+        <td class="findings-zero" style="text-align:right">0</td>
+        <td class="verdict">stalled, asked for the file</td>
+      </tr>
+      <tr>
+        <td class="label">general-purpose</td>
+        <td class="brief-vague">vague</td>
+        <td class="metric" style="text-align:right">37,625</td>
+        <td class="metric" style="text-align:right">45.3 s</td>
+        <td class="metric" style="text-align:right">8</td>
+        <td class="verdict">explored, rediscovered, succeeded slowly</td>
+      </tr>
+      <tr>
+        <td class="label">dotnet-code-reviewer</td>
+        <td class="brief-explicit">explicit</td>
+        <td class="metric" style="text-align:right">28,028</td>
+        <td class="metric" style="text-align:right">14.3 s</td>
+        <td class="findings-good" style="text-align:right">9</td>
+        <td class="verdict">clean review, no exploration</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="receipt">
+    <strong>Receipt from the wire (Probe 1, conversation isolation):</strong><br>
+    Request payload contained <em>only</em> the task prompt. The token
+    <code>PURPLE_OWL_42</code> — which appeared four times in the parent's history —
+    was <strong>not</strong> in the request. Subagent replied: <code>I do not know.</code>
+    Server response id: <code>chatcmpl-DmmUpP4qMsNqugTSFXMRWymN8mYcR</code>.
+  </div>
+
+  <div class="footer">
+    <span>github.com/rambharlia007/linkedin-pocs</span>
+    <span>Ram Avatar S · 2026-06-04</span>
+  </div>
+</div>
+</body>
+</html>
