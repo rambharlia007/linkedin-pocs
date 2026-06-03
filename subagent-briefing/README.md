@@ -1,5 +1,9 @@
 # The Subagent Briefing Problem
 
+**Date:** 2026-06-04
+**Topic:** how context actually flows into subagents across agentic frameworks
+**LinkedIn post:** `linkedin-post.txt` (in this folder)
+
 > A subagent does not inherit its parent's conversation, its parent's
 > "files I just read" state, or its parent's session memory. It starts
 > with the task prompt you hand it — and nothing else from your live
