@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Headroom on Claude Code — Session Stats</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    background: #0e1116;
+    color: #c9d1d9;
+    margin: 0;
+    padding: 40px 24px;
+    line-height: 1.45;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  h1 {
+    font-size: 22px;
+    color: #f0f6fc;
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+  .sub {
+    color: #8b949e;
+    font-size: 13px;
+    margin-bottom: 32px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .kpi {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 16px 14px;
+  }
+  .kpi-label {
+    font-size: 11px;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+  .kpi-val {
+    font-size: 22px;
+    color: #f0f6fc;
+    font-weight: 600;
+  }
+  .kpi-val.big { color: #3fb950; }
+  .kpi-val.amber { color: #d29922; }
+  .kpi-sub {
+    font-size: 11px;
+    color: #6e7681;
+    margin-top: 4px;
+  }
+  h2 {
+    font-size: 14px;
+    color: #f0f6fc;
+    margin: 24px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid #30363d;
+    padding-bottom: 6px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 13px;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid #21262d;
+  }
+  th {
+    background: #1c2128;
+    color: #8b949e;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: right; color: #f0f6fc; }
+  td.pct { text-align: right; color: #3fb950; font-weight: 600; }
+  .bar-wrap {
+    background: #1c2128;
+    border-radius: 4px;
+    height: 18px;
+    position: relative;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+  .bar {
+    background: linear-gradient(90deg, #3fb950 0%, #56d364 100%);
+    height: 100%;
+    width: 29.3%;
+    border-radius: 4px;
+  }
+  .bar-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: #0e1116;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .perf-block {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #c9d1d9;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .perf-block .k { color: #79c0ff; }
+  .perf-block .n { color: #ffa657; }
+  .perf-block .g { color: #3fb950; }
+  .footer {
+    margin-top: 28px;
+    padding-top: 16px;
+    border-top: 1px solid #30363d;
+    color: #6e7681;
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Headroom on Claude Code — session stats</h1>
+<div class="sub">
+  2-hour real iterative dev session. Container: <code>headroom-code:v3</code>
+  (official image + PyTorch + [code] extra + ast-grep force-reinstall).
+  Flags: <code>--mode token --intercept-tool-results --code-graph</code>. Claude Code subscription (OAuth).
+</div>
+
+<div class="grid">
+  <div class="kpi">
+    <div class="kpi-label">Overall reduction</div>
+    <div class="kpi-val big">29.3%</div>
+    <div class="kpi-sub">2,240,642 / 7,642,336 tokens</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Best single request</div>
+    <div class="kpi-val big">43.7%</div>
+    <div class="kpi-sub">88,427 to 49,754 tokens</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Cache hit rate</div>
+    <div class="kpi-val big">99-100%</div>
+    <div class="kpi-sub">CacheAligner preserved</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Cost saved</div>
+    <div class="kpi-val big">$10.89</div>
+    <div class="kpi-sub">on $23.02 (47.3%)</div>
+  </div>
+</div>
+
+<h2>Request distribution (128 total)</h2>
+<table>
+  <thead>
+    <tr><th>Bucket</th><th>Count</th><th>Meaning</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Compressed</td>
+      <td class="num">89</td>
+      <td>Tokens removed via Kompress / read-lifecycle / etc.</td>
+    </tr>
+    <tr>
+      <td>prefix_frozen</td>
+      <td class="num">~35</td>
+      <td>Cache prefix preserved (correct CacheAligner behavior)</td>
+    </tr>
+    <tr>
+      <td>no_compressible_content</td>
+      <td class="num">3</td>
+      <td>Nothing in the request matched a compressor</td>
+    </tr>
+    <tr>
+      <td>passthrough</td>
+      <td class="num">1</td>
+      <td>Non-Anthropic traffic (subscription poller)</td>
+    </tr>
+    <tr>
+      <td>too_small</td>
+      <td class="num">1</td>
+      <td>Below compression threshold</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Top 10 compressed requests</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Before (tokens)</th>
+      <th>After (tokens)</th>
+      <th>Saved</th>
+      <th>Reduction</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="num">88,427</td><td class="num">49,754</td><td class="num">38,673</td><td class="pct">43.7%</td></tr>
+    <tr><td class="num">92,255</td><td class="num">53,582</td><td class="num">38,673</td><td class="pct">41.9%</td></tr>
+    <tr><td class="num">92,665</td><td class="num">53,992</td><td class="num">38,673</td><td class="pct">41.7%</td></tr>
+    <tr><td class="num">93,279</td><td class="num">54,606</td><td class="num">38,673</td><td class="pct">41.5%</td></tr>
+    <tr><td class="num">94,052</td><td class="num">55,379</td><td class="num">38,673</td><td class="pct">41.1%</td></tr>
+    <tr><td class="num">94,779</td><td class="num">56,106</td><td class="num">38,673</td><td class="pct">40.8%</td></tr>
+    <tr><td class="num">95,252</td><td class="num">56,446</td><td class="num">38,806</td><td class="pct">40.7%</td></tr>
+    <tr><td class="num">95,927</td><td class="num">57,121</td><td class="num">38,806</td><td class="pct">40.5%</td></tr>
+    <tr><td class="num">95,974</td><td class="num">57,168</td><td class="num">38,806</td><td class="pct">40.4%</td></tr>
+    <tr><td class="num">96,683</td><td class="num">57,877</td><td class="num">38,806</td><td class="pct">40.1%</td></tr>
+  </tbody>
+</table>
+
+<h2>One canonical PERF line (from proxy.log)</h2>
+<div class="perf-block"><span class="k">PERF</span> model=<span class="k">claude-opus-4-7</span> msgs=<span class="n">137</span>
+  tok_before=<span class="n">96,683</span>
+  tok_after =<span class="n">57,877</span>
+  tok_saved =<span class="g">38,806   (40.1% reduction)</span>
+  cache_read=<span class="n">173,971</span>
+  cache_write=<span class="n">897</span>      <span class="g">(CacheAligner: minimal invalidation)</span>
+  cache_hit_pct=<span class="g">99</span>
+  opt_ms=<span class="n">145</span>
+  transforms=
+    read_lifecycle:stale*3             (collapsed 3 stale Read outputs)
+    router:tool_result:kompress        (ModernBERT shrunk a tool_result)
+    router:protected:user_message*8    (left 8 user messages alone)
+    router:excluded:tool*15            (left 15 tool blocks alone)
+</div>
+
+<h2>Overall reduction</h2>
+<div class="bar-wrap">
+  <div class="bar"></div>
+  <div class="bar-label">29.3% — 2,240,642 of 7,642,336 tokens removed</div>
+</div>
+
+<div class="footer">
+  Session 2026-06-05. Headroom 0.23.0. claude-opus-4-7 primary, claude-haiku-4-5 subagents (preserved).
+  Recipe + repo: github.com/rambharlia007/agent-lab/tree/main/headroom-claude-code
+</div>
+
+</div>
+</body>
+</html>
