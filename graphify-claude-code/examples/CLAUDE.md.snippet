@@ -1,0 +1,33 @@
+# Append this block to ~/.claude/CLAUDE.md (or your project's CLAUDE.md)
+# Adjust the graph location to match your convention (this example uses ~/graphs/<repo>/)
+
+## Graph-first code navigation
+
+When working in a repo, FIRST check whether a Graphify graph exists for it
+(typical location: ~/graphs/<repo-name>/graphify-out/graph.json or similar).
+If it does, prefer graph queries over grep / glob / read for structural questions.
+
+Use the commands in this priority order — `explain` is cheapest and most precise;
+`query` is the last resort for vague NL questions with no known starting symbol.
+
+| Question                                              | Use this                                | Why this order                          |
+|-------------------------------------------------------|-----------------------------------------|-----------------------------------------|
+| "How does X work / what does it touch?" (symbol known) | `graphify explain "X"`                  | Cheapest, most precise — start here     |
+| "How does A connect to B?" (verify a hypothesis)       | `graphify path "A" "B"`                 | Confirms a structural guess             |
+| "What's affected if I change X?" (refactor safety)     | `graphify affected "X" --depth 2`       | Blast-radius check                      |
+| "What's the pattern for Y?" (no known symbol)          | `graphify query "<natural-language>"`   | Broadest, least precise — last resort   |
+| "What are the core abstractions / cycles?"             | Read `GRAPH_REPORT.md`                  | One-shot context (God Nodes, Cycles)    |
+
+**Workflow:** graph queries to locate (which files matter) → targeted Read to fetch
+content (only the files the graph pointed to). The graph replaces the "which file?"
+decision, not the Read itself. Don't fall back to grep / glob after the graph has
+cited specific files — just Read those.
+
+If no graph exists for the current repo and the work is non-trivial
+(refactor, large feature, unfamiliar codebase), suggest building one
+with `/graphify .` before diving in.
+
+Known quirk: `query` / `path` / `explain` / `affected` ignore the GRAPHIFY_OUT
+env var and hardcode `graphify-out/graph.json` relative to cwd
+(see https://github.com/safishamsi/graphify/issues/756).
+To query a centralized graph, `cd` to the graph's directory first.

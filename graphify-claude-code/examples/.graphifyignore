@@ -1,0 +1,77 @@
+# .graphifyignore — drop in your repo root before `graphify .`
+# Graphify's built-in defaults skip node_modules, __pycache__, .git, venv, dist —
+# but NOT .venv (dot-prefixed), bin/, obj/, or large knowledge corpora.
+# This template covers Python, .NET, Node, and common infra noise.
+
+# --- Python ---
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# --- .NET ---
+bin/
+obj/
+**/bin/
+**/obj/
+.vs/
+*.dll
+*.pdb
+*.exe
+TestResults/
+
+# --- Node / frontend ---
+node_modules/
+**/node_modules/
+dist/
+.next/
+.nuxt/
+build/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# --- Java / JVM ---
+target/
+.gradle/
+*.class
+
+# --- Rust / Go ---
+target/
+vendor/
+
+# --- Infra & generated manifests (noise for code understanding) ---
+manifests/
+k8s/
+deploy/
+helm/
+*.tf.json
+
+# --- Knowledge corpora (graph separately if needed) ---
+knowledge/
+**/knowledge/
+docs/api/        # generated API docs
+docs/_build/
+
+# --- Logs, history, eval artifacts ---
+*.log
+*-history/
+eval-tests/
+local/
+.coverage
+coverage/
+htmlcov/
+
+# --- Graph output itself ---
+graphify-out/
+
+# --- Misc heavyweight / generated ---
+*.min.js
+*.min.css
+*.map
+*.snap
